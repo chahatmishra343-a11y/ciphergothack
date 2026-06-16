@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CipherGiftyy // Matrix Link Generator</title>
+    <style>
+        :root {
+            --matrix-green: #00ff00;
+            --matrix-glow: #00ff0088;
+            --bg-black: #000000;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-black);
+            overflow: hidden;
+            color: var(--matrix-green);
+        }
+
+        /* Background Canvas for Binary Rain */
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* Glassmorphic/Solid Terminal Card */
+        .console-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            background-color: var(--bg-black);
+            border: 2px solid var(--matrix-green);
+            box-shadow: 0 0 20px var(--matrix-glow);
+            padding: 30px;
+            width: 90%;
+            max-width: 450px;
+            text-align: center;
+            border-radius: 4px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-shadow: 0 0 8px var(--matrix-glow);
+            letter-spacing: 2px;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            background: transparent;
+            border: 1px solid var(--matrix-green);
+            padding: 12px;
+            color: var(--matrix-green);
+            font-size: 1.1rem;
+            text-align: center;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            box-shadow: 0 0 12px var(--matrix-glow);
+            border: 1px solid #ffffff;
+        }
+
+        button {
+            background-color: var(--matrix-green);
+            color: var(--bg-black);
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #ffffff;
+            box-shadow: 0 0 15px #ffffff;
+        }
+
+        .result-box {
+            margin-top: 20px;
+            display: none;
+        }
+
+        .generated-url {
+            word-break: break-all;
+            font-size: 0.85rem;
+            background: #111;
+            padding: 10px;
+            border: 1px dashed var(--matrix-green);
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        /* --- PREVIEW / EXP_LINK OVERLAY --- */
+        #preview-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-black);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .typewriter-text {
+            font-size: 1.5rem;
+            white-space: nowrap;
+            overflow: hidden;
+            border-right: 2px solid var(--matrix-green);
+            animation: blink 0.75s step-end infinite;
+            max-width: fit-content;
+        }
+
+        @keyframes blink {
+            from, to { border-color: transparent }
+            50% { border-color: var(--matrix-green); }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="matrixCanvas"></canvas>
+
+    <div class="console-container" id="generatorCard">
+        <h1>&gt; CIPHER_GIFTYY_BUILDER</h1>
+        <p style="font-size: 0.85rem; margin-bottom: 20px; color: #888;">GENERATE A HACKER-STYLE BIRTHDAY WISH</p>
+        
+        <div class="input-group">
+            <input type="text" id="targetName" placeholder="ENTER NAME (E.G. LUCY)" maxlength="10" autocomplete="off">
+        </div>
+        
+        <button onclick="generateGiftLink()">GENERATE GIFT LINK</button>
+
+        <div class="result-box" id="resultBox">
+            <p style="margin-bottom: 8px; font-size: 0.9rem;">⚡ LINK SECURED:</p>
+            <div class="generated-url" id="linkDisplay"></div>
+            <button onclick="copyAndPreview()" style="background: transparent; color: var(--matrix-green); border: 1px solid var(--matrix-green);">COPY & PREVIEW LAUNCH</button>
+        </div>
+    </div>
+
+    <div id="preview-overlay">
+        <div class="typewriter-text" id="promptText"></div>
+    </div>
+
+    <script>
+        // --- MATRIX BACKGROUND DIGITAL WATERFALL ---
+        const canvas = document.getElementById('matrixCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        const chars = "01010101";
+        const fontSize = 14;
+        let columns = canvas.width / fontSize;
+        let drops = Array(Math.floor(columns)).fill(1);
+
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = '#00ff00';
+            ctx.font = fontSize + 'px monospace';
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = chars.charAt(Math.floor(Math.random() * chars.length));
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+        let matrixInterval = setInterval(drawMatrix, 30);
+
+        // --- GENERATOR LOGIC ---
+        let finalUrl = "";
+        function generateGiftLink() {
+            const name = document.getElementById('targetName').value.trim();
+            if(!name) {
+                alert("Please enter a name first, Hacker!");
+                return;
+            }
+            
+            // Build absolute URL using current deployment location + query param
+            const baseUrl = window.location.href.split('?')[0];
+            finalUrl = `${baseUrl}?gift=${encodeURIComponent(name)}`;
+            
+            document.getElementById('linkDisplay').innerText = finalUrl;
+            document.getElementById('resultBox').style.display = 'block';
+        }
+
+        function copyAndPreview() {
+            navigator.clipboard.writeText(finalUrl);
+            alert("Copied to clipboard! Launching target preview phase...");
+            window.location.href = finalUrl; // Refreshes page with the query to simulate gift opening
+        }
+
+        // --- RECEIVER / PREVIEW PHASE ENGINE ---
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const giftName = urlParams.get('gift');
+
+            if(giftName) {
+                // Hide Generator UI completely
+                document.getElementById('generatorCard').style.display = 'none';
+                
+                // Show Receiver Overlay
+                const overlay = document.getElementById('preview-overlay');
+                overlay.style.display = 'flex';
+
+                // Typewriter Sequence for Initial Screen
+                const textContainer = document.getElementById('promptText');
+                const message = "> TURN YOUR PHONE LEFT.";
+                let charIndex = 0;
+
+                function typeWriter() {
+                    if (charIndex < message.length) {
+                        textContainer.innerHTML += message.charAt(charIndex);
+                        charIndex++;
+                        setTimeout(typeWriter, 100);
+                    } else {
+                        // Wait 1.5 seconds after typing complete, then watch orientation
+                        setTimeout(checkOrientation, 1500);
+                    }
+                }
+                typeWriter();
+
+                function checkOrientation() {
+                    // Check if horizontal aspect ratio is engaged
+                    if (window.innerWidth > window.innerHeight) {
+                        startLandscapeWaterfall(giftName.toUpperCase());
+                    } else {
+                        // Keep polling until they rotate their phone
+                        textContainer.innerHTML = "> AWAITING DEVICE ROTATION...";
+                        setTimeout(checkOrientation, 500);
+                    }
+                }
+            }
+        }
+
+        // --- STAGE 3, 4, & 5: THE LANDSCAPE SHOW ---
+        function startLandscapeWaterfall(name) {
+            clearInterval(matrixInterval); // Stop normal vertical cascade
+            
+            const overlay = document.getElementById('preview-overlay');
+            overlay.innerHTML = `<canvas id="landscapeCanvas"></canvas>`;
+            
+            const lCanvas = document.getElementById('landscapeCanvas');
+            const lCtx = lCanvas.getContext('2d');
+            
+            lCanvas.width = window.innerWidth;
+            lCanvas.height = window.innerHeight;
+
+            // Enforce exactly 13 columns across the landscape viewport layout
+            const totalLines = 13;
+            const colWidth = lCanvas.width / totalLines;
+            let lDrops = Array(totalLines).fill(0);
+            
+            let timelineCounter = 0;
+
+            function drawLandscape() {
+                lCtx.fillStyle = 'rgba(0, 0, 0, 0.08)';
+                lCtx.fillRect(0, 0, lCanvas.width, lCanvas.height);
+                lCtx.font = 'bold ' + (colWidth * 0.6) + 'px monospace';
+
+                timelineCounter += 30; // ms tracking
+
+                for(let i = 0; i < totalLines; i++) {
+                    let charToPrint = Math.random() > 0.5 ? "1" : "0";
+
+                    // Stage 4: After 2 seconds, stream Happy Birthday characters down lines
+                    if (timelineCounter > 2000 && timelineCounter <= 10000) {
+                        const wishStr = "HAPPYBIRTHDAY";
+                        if(Math.random() > 0.7) {
+                            charToPrint = wishStr.charAt(i % wishStr.length);
+                        }
+                    } 
+                    // Stage 5: Climax Sequence (Inject Custom Name Centered in Matrix)
+                    else if (timelineCounter > 10000) {
+                        const startCol = Math.floor((totalLines - name.length) / 2);
+                        const endCol = startCol + name.length;
+
+                        if (i >= startCol && i < endCol) {
+                            charToPrint = name.charAt(i - startCol);
+                        }
+                    }
+
+                    // Display text glowing color states
+                    lCtx.fillStyle = (timelineCounter > 10000) ? '#ffffff' : '#00ff00';
+                    if (timelineCounter > 10000) {
+                        lCtx.shadowBlur = 15;
+                        lCtx.shadowColor = '#00ff00';
+                    }
+
+                    lCtx.fillText(charToPrint, (i * colWidth) + (colWidth/4), lDrops[i]);
+                    lCtx.shadowBlur = 0; // Clear shadow for efficiency
+
+                    lDrops[i] += (colWidth * 0.7); // Scroll down sequentially
+                    if (lDrops[i] > lCanvas.height && Math.random() > 0.85) {
+                        lDrops[i] = 0;
+                    }
+                }
+            }
+            setInterval(drawLandscape, 45);
+        }
+    </script>
+</body>
+</html>
