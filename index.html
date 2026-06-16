@@ -169,173 +169,187 @@
         <div class="typewriter-text" id="promptText"></div>
     </div>
 
-    <script>
-        // --- MATRIX BACKGROUND DIGITAL WATERFALL ---
-        const canvas = document.getElementById('matrixCanvas');
-        const ctx = canvas.getContext('2d');
+  <script>
+    // --- MATRIX BACKGROUND DIGITAL WATERFALL ---
+    const canvas = document.getElementById('matrixCanvas');
+    const ctx = canvas.getContext('2d');
 
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        resizeCanvas();
-        window.addEventListener('resize', resizeCanvas);
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
 
-        const chars = "01010101";
-        const fontSize = 14;
-        let columns = canvas.width / fontSize;
-        let drops = Array(Math.floor(columns)).fill(1);
+    const chars = "01010101";
+    const fontSize = 14;
+    let columns = canvas.width / fontSize;
+    let drops = Array(Math.floor(columns)).fill(1);
 
-        function drawMatrix() {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+    function drawMatrix() {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            ctx.fillStyle = '#00ff00';
-            ctx.font = fontSize + 'px monospace';
+        ctx.fillStyle = '#00ff00';
+        ctx.font = fontSize + 'px monospace';
 
-            for (let i = 0; i < drops.length; i++) {
-                const text = chars.charAt(Math.floor(Math.random() * chars.length));
-                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+        for (let i = 0; i < drops.length; i++) {
+            const text = chars.charAt(Math.floor(Math.random() * chars.length));
+            ctx.fillText(text, i * fontSize, drops[i] * fontSize);
 
-                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-                    drops[i] = 0;
-                }
-                drops[i]++;
+            if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                drops[i] = 0;
             }
+            drops[i]++;
         }
-        let matrixInterval = setInterval(drawMatrix, 30);
+    }
+    let matrixInterval = setInterval(drawMatrix, 30);
 
-        // --- GENERATOR LOGIC ---
-        let finalUrl = "";
-        function generateGiftLink() {
-            const name = document.getElementById('targetName').value.trim();
-            if(!name) {
-                alert("Please enter a name first, Hacker!");
-                return;
-            }
-            
-            // Build absolute URL using current deployment location + query param
-            const baseUrl = window.location.href.split('?')[0];
-            finalUrl = `${baseUrl}?gift=${encodeURIComponent(name)}`;
-            
-            document.getElementById('linkDisplay').innerText = finalUrl;
-            document.getElementById('resultBox').style.display = 'block';
+    // --- GENERATOR LOGIC ---
+    let finalUrl = "";
+    function generateGiftLink() {
+        const name = document.getElementById('targetName').value.trim();
+        if(!name) {
+            alert("Please enter a name first, Hacker!");
+            return;
         }
+        
+        const baseUrl = window.location.href.split('?')[0];
+        finalUrl = `${baseUrl}?gift=${encodeURIComponent(name)}`;
+        
+        document.getElementById('linkDisplay').innerText = finalUrl;
+        document.getElementById('resultBox').style.display = 'block';
+    }
 
-        function copyAndPreview() {
-            navigator.clipboard.writeText(finalUrl);
-            alert("Copied to clipboard! Launching target preview phase...");
-            window.location.href = finalUrl; // Refreshes page with the query to simulate gift opening
-        }
+    function copyAndPreview() {
+        navigator.clipboard.writeText(finalUrl);
+        alert("Copied to clipboard! Launching target preview phase...");
+        window.location.href = finalUrl;
+    }
 
-        // --- RECEIVER / PREVIEW PHASE ENGINE ---
-        window.onload = function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const giftName = urlParams.get('gift');
+    // --- RECEIVER / PREVIEW PHASE ENGINE ---
+    window.onload = function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const giftName = urlParams.get('gift');
 
-            if(giftName) {
-                // Hide Generator UI completely
-                document.getElementById('generatorCard').style.display = 'none';
-                
-                // Show Receiver Overlay
-                const overlay = document.getElementById('preview-overlay');
-                overlay.style.display = 'flex';
-
-                // Typewriter Sequence for Initial Screen
-                const textContainer = document.getElementById('promptText');
-                const message = "> TURN YOUR PHONE LEFT.";
-                let charIndex = 0;
-
-                function typeWriter() {
-                    if (charIndex < message.length) {
-                        textContainer.innerHTML += message.charAt(charIndex);
-                        charIndex++;
-                        setTimeout(typeWriter, 100);
-                    } else {
-                        // Wait 1.5 seconds after typing complete, then watch orientation
-                        setTimeout(checkOrientation, 1500);
-                    }
-                }
-                typeWriter();
-
-                function checkOrientation() {
-                    // Check if horizontal aspect ratio is engaged
-                    if (window.innerWidth > window.innerHeight) {
-                        startLandscapeWaterfall(giftName.toUpperCase());
-                    } else {
-                        // Keep polling until they rotate their phone
-                        textContainer.innerHTML = "> AWAITING DEVICE ROTATION...";
-                        setTimeout(checkOrientation, 500);
-                    }
-                }
-            }
-        }
-
-        // --- STAGE 3, 4, & 5: THE LANDSCAPE SHOW ---
-        function startLandscapeWaterfall(name) {
-            clearInterval(matrixInterval); // Stop normal vertical cascade
-            
+        if(giftName) {
+            document.getElementById('generatorCard').style.display = 'none';
             const overlay = document.getElementById('preview-overlay');
-            overlay.innerHTML = `<canvas id="landscapeCanvas"></canvas>`;
-            
-            const lCanvas = document.getElementById('landscapeCanvas');
-            const lCtx = lCanvas.getContext('2d');
-            
-            lCanvas.width = window.innerWidth;
-            lCanvas.height = window.innerHeight;
+            overlay.style.display = 'flex';
 
-            // Enforce exactly 13 columns across the landscape viewport layout
-            const totalLines = 13;
-            const colWidth = lCanvas.width / totalLines;
-            let lDrops = Array(totalLines).fill(0);
-            
-            let timelineCounter = 0;
+            const textContainer = document.getElementById('promptText');
+            const message = "> TURN YOUR PHONE LEFT.";
+            let charIndex = 0;
 
-            function drawLandscape() {
-                lCtx.fillStyle = 'rgba(0, 0, 0, 0.08)';
-                lCtx.fillRect(0, 0, lCanvas.width, lCanvas.height);
-                lCtx.font = 'bold ' + (colWidth * 0.6) + 'px monospace';
-
-                timelineCounter += 30; // ms tracking
-
-                for(let i = 0; i < totalLines; i++) {
-                    let charToPrint = Math.random() > 0.5 ? "1" : "0";
-
-                    // Stage 4: After 2 seconds, stream Happy Birthday characters down lines
-                    if (timelineCounter > 2000 && timelineCounter <= 10000) {
-                        const wishStr = "HAPPYBIRTHDAY";
-                        if(Math.random() > 0.7) {
-                            charToPrint = wishStr.charAt(i % wishStr.length);
-                        }
-                    } 
-                    // Stage 5: Climax Sequence (Inject Custom Name Centered in Matrix)
-                    else if (timelineCounter > 10000) {
-                        const startCol = Math.floor((totalLines - name.length) / 2);
-                        const endCol = startCol + name.length;
-
-                        if (i >= startCol && i < endCol) {
-                            charToPrint = name.charAt(i - startCol);
-                        }
-                    }
-
-                    // Display text glowing color states
-                    lCtx.fillStyle = (timelineCounter > 10000) ? '#ffffff' : '#00ff00';
-                    if (timelineCounter > 10000) {
-                        lCtx.shadowBlur = 15;
-                        lCtx.shadowColor = '#00ff00';
-                    }
-
-                    lCtx.fillText(charToPrint, (i * colWidth) + (colWidth/4), lDrops[i]);
-                    lCtx.shadowBlur = 0; // Clear shadow for efficiency
-
-                    lDrops[i] += (colWidth * 0.7); // Scroll down sequentially
-                    if (lDrops[i] > lCanvas.height && Math.random() > 0.85) {
-                        lDrops[i] = 0;
-                    }
+            function typeWriter() {
+                if (charIndex < message.length) {
+                    textContainer.innerHTML += message.charAt(charIndex);
+                    charIndex++;
+                    setTimeout(typeWriter, 100);
+                } else {
+                    setTimeout(checkOrientation, 1500);
                 }
             }
-            setInterval(drawLandscape, 45);
+            typeWriter();
+
+            function checkOrientation() {
+                if (window.innerWidth > window.innerHeight) {
+                    startLandscapeWaterfall(giftName.toUpperCase());
+                } else {
+                    textContainer.innerHTML = "> AWAITING DEVICE ROTATION...";
+                    setTimeout(checkOrientation, 500);
+                }
+            }
         }
-    </script>
-</body>
-</html>
+    }
+
+    // --- STAGE 3, 4, & 5: THE FIXED LANDSCAPE SHOW ---
+    function startLandscapeWaterfall(name) {
+        clearInterval(matrixInterval); 
+        
+        const overlay = document.getElementById('preview-overlay');
+        overlay.innerHTML = `<canvas id="landscapeCanvas"></canvas>`;
+        
+        const lCanvas = document.getElementById('landscapeCanvas');
+        const lCtx = lCanvas.getContext('2d');
+        
+        lCanvas.width = window.innerWidth;
+        lCanvas.height = window.innerHeight;
+
+        const totalLines = 13;
+        const colWidth = lCanvas.width / totalLines;
+        
+        // Slower, smooth frame step movement parameters
+        let lDrops = Array(totalLines).fill(0);
+        let timelineCounter = 0;
+
+        const wishStr = "HAPPYBIRTHDAY"; 
+        const startCol = Math.floor((totalLines - name.length) / 2);
+        const endCol = startCol + name.length;
+
+        function drawLandscape() {
+            // Stronger trails to clear out ghost artifacts completely
+            lCtx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+            lCtx.fillRect(0, 0, lCanvas.width, lCanvas.height);
+            
+            lCtx.font = 'bold ' + (colWidth * 0.75) + 'px monospace';
+            timelineCounter += 40; 
+
+            for(let i = 0; i < totalLines; i++) {
+                let charToPrint = "";
+                let isWordChar = false;
+
+                // PHASE A: Pure Binary Intro (0 to 3 seconds)
+                if (timelineCounter <= 3000) {
+                    charToPrint = Math.random() > 0.5 ? "1" : "0";
+                }
+                // PHASE B: HAPPY BIRTHDAY Run (3 to 9 seconds)
+                else if (timelineCounter > 3000 && timelineCounter <= 9000) {
+                    charToPrint = wishStr.charAt(i);
+                    isWordChar = true;
+                } 
+                // PHASE C: Highlighting Custom Name (After 9 seconds)
+                else if (timelineCounter > 9000) {
+                    if (i >= startCol && i < endCol) {
+                        charToPrint = name.charAt(i - startCol);
+                        isWordChar = true;
+                    } else {
+                        // Keep background tracks running, but make them very dull
+                        charToPrint = Math.random() > 0.5 ? "1" : "0";
+                    }
+                }
+
+                // --- Visual Treatment & Highlighting Rules ---
+                if (isWordChar) {
+                    if (timelineCounter > 9000) {
+                        // The Custom Name flash state: Hyper-bright neon green with custom heavy glow
+                        lCtx.fillStyle = '#00ff55';
+                        lCtx.shadowBlur = 20;
+                        lCtx.shadowColor = '#00ff00';
+                    } else {
+                        // Happy Birthday state: Crisp bright white terminal text
+                        lCtx.fillStyle = '#ffffff';
+                        lCtx.shadowBlur = 8;
+                        lCtx.shadowColor = '#00aa00';
+                    }
+                } else {
+                    // Background binary noise: Extremely dim/dull green so it stays in the back
+                    lCtx.fillStyle = 'rgba(0, 100, 0, 0.25)';
+                    lCtx.shadowBlur = 0;
+                }
+
+                // Render the character safely
+                lCtx.fillText(charToPrint, (i * colWidth) + (colWidth / 4), lDrops[i]);
+                lCtx.shadowBlur = 0; // Clear blur layer instantly
+
+                // Continuous falling vertical step incrementation
+                lDrops[i] += (colWidth * 0.4); 
+
+                if (lDrops[i] > lCanvas.height) {
+                    lDrops[i] = 0;
+                }
+            }
+        }
+        setInterval(drawLandscape, 40);
+    }
+</script>
