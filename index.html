@@ -258,14 +258,14 @@
             }
         }
 
-        // --- STAGE 3, 4, & 5: SYNCED LANDSCAPE PERFORMANCE SHOW ---
+        // --- STAGE 3, 4, & 5: PERFECTLY LINE-ALIGNED WATERFALL ---
         function startLandscapeWaterfall(name) {
             clearInterval(matrixInterval);
             
             const music = document.getElementById('cyberMusic');
             if (music) {
                 music.play().catch(error => {
-                    console.log("Audio unlocked by device flip context:", error);
+                    console.log("Audio unlocked:", error);
                 });
             }
             
@@ -281,97 +281,89 @@
             const totalLines = 13;
             const colWidth = lCanvas.width / totalLines;
             
-            // Phase A starts with scattered randomized rain heights
-            let lDrops = Array(totalLines).fill(0).map(() => Math.random() * -lCanvas.height);
+            // NO MORE RANDOM HEIGHTS! All 13 columns start exactly at the same level (-20)
+            let sharedYPosition = -20;
             let timelineCounter = 0;
 
             const wishStr = "HAPPYBIRTHDAY"; 
             const startCol = Math.floor((totalLines - name.length) / 2);
             const endCol = startCol + name.length;
 
-            // Flags to monitor when a phase transition happens so we snap heights ONCE
-            let happyBirthdaySnapped = false;
-            let nameSnapped = false;
-
             function drawLandscape() {
-                lCtx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+                lCtx.fillStyle = 'rgba(0, 0, 0, 0.15)'; // Smooth trails
                 lCtx.fillRect(0, 0, lCanvas.width, lCanvas.height);
                 
                 lCtx.font = 'bold ' + (colWidth * 0.75) + 'px monospace';
-                timelineCounter += 50;
-
-                // --- TRANSITION SYNC TRAPS ---
-                // Exactly at 4 seconds, force every column tracking drop to reset flawlessly to the top together!
-                if (timelineCounter > 4000 && !happyBirthdaySnapped) {
-                    lDrops.fill(-20); 
-                    happyBirthdaySnapped = true;
-                }
-                // Exactly at 12 seconds, force them to snap perfectly to the top again for the name launch!
-                if (timelineCounter > 12000 && !nameSnapped) {
-                    lDrops.fill(-20);
-                    nameSnapped = true;
-                }
+                timelineCounter += 45; // Medium Speed Calculation
 
                 for(let i = 0; i < totalLines; i++) {
                     let charToPrint = "";
                     let isWordChar = false;
+                    let currentPhase = "intro";
 
-                    // PHASE A: Natural Scattered Binary Rain (0 - 4s)
-                    if (timelineCounter <= 4000) {
+                    // PHASE A: Pure Binary Intro (0 - 3s) -> All 13 lines matched!
+                    if (timelineCounter <= 3000) {
                         charToPrint = Math.random() > 0.5 ? "1" : "0";
+                        currentPhase = "intro";
                     }
-                    // PHASE B: Synced Uniform HAPPY BIRTHDAY Line (4s - 12s)
-                    else if (timelineCounter > 4000 && timelineCounter <= 12000) {
+                    // PHASE B: HAPPY BIRTHDAY Line (3s - 13s -> Exactly 10 Seconds)
+                    else if (timelineCounter > 3000 && timelineCounter <= 13000) {
                         charToPrint = wishStr.charAt(i);
                         isWordChar = true;
+                        currentPhase = "birthday";
                     } 
-                    // PHASE C: Synced Uniform CUSTOM NAME Line Climax (12s+)
-                    else if (timelineCounter > 12000) {
+                    // PHASE C: CUSTOM NAME Climax (13s - 25s -> Exactly 12 Seconds)
+                    else if (timelineCounter > 13000) {
                         if (i >= startCol && i < endCol) {
                             charToPrint = name.charAt(i - startCol);
                             isWordChar = true;
+                            currentPhase = "name";
                         } else {
                             charToPrint = Math.random() > 0.5 ? "1" : "0";
+                            currentPhase = "name_bg";
                         }
                     }
 
-                    // --- Styling Parameters ---
-                    if (isWordChar) {
-                        if (timelineCounter > 12000) {
-                            lCtx.fillStyle = '#00ff55';
-                            lCtx.shadowBlur = 20;
-                            lCtx.shadowColor = '#00ff00';
-                        } else {
-                            lCtx.fillStyle = '#ffffff';
-                            lCtx.shadowBlur = 10;
-                            lCtx.shadowColor = '#00aa00';
-                        }
-                    } else {
-                        lCtx.fillStyle = 'rgba(0, 255, 0, 0.15)';
+                    // --- Custom Colors & Themes per Phase ---
+                    if (currentPhase === "intro") {
+                        // 1. Classic Green Theme for Intro
+                        lCtx.fillStyle = '#00ff00';
+                        lCtx.shadowBlur = 5;
+                        lCtx.shadowColor = '#00ff00';
+                    } 
+                    else if (currentPhase === "birthday") {
+                        // 2. White Text with Green Glowing Outline for Happy Birthday
+                        lCtx.fillStyle = '#ffffff';
+                        lCtx.shadowBlur = 12;
+                        lCtx.shadowColor = '#00ff00';
+                    } 
+                    else if (currentPhase === "name") {
+                        // 3. BRAND NEW COLOR: Cyber Cyan/Electric Blue for the Custom Name!
+                        lCtx.fillStyle = '#00f0ff';
+                        lCtx.shadowBlur = 25;
+                        lCtx.shadowColor = '#00aaff';
+                    } 
+                    else {
+                        // Dull background during name phase
+                        lCtx.fillStyle = 'rgba(0, 255, 0, 0.12)';
                         lCtx.shadowBlur = 0;
                     }
 
-                    lCtx.fillText(charToPrint, (i * colWidth) + (colWidth / 4), lDrops[i]);
+                    // Draw all characters at the exact SAME shared vertical Y position!
+                    lCtx.fillText(charToPrint, (i * colWidth) + (colWidth / 4), sharedYPosition);
                     lCtx.shadowBlur = 0;
+                }
 
-                    // Move down uniformly
-                    lDrops[i] += 6; 
+                // Medium uniform falling speed step (Smooth grid crawl)
+                sharedYPosition += 7; 
 
-                    // Loop boundaries
-                    if (lDrops[i] > lCanvas.height) {
-                        // After snapping is engaged, loops should drop uniformly too to keep the text aligned!
-                        if (timelineCounter > 4000 && timelineCounter <= 12000) {
-                            lDrops[i] = -20;
-                        } else if (timelineCounter > 12000) {
-                            lDrops[i] = -20;
-                        } else {
-                            // Phase A keeps its chaotic loops
-                            lDrops[i] = Math.random() * -100;
-                        }
-                    }
+                // If the horizontal aligned line goes off screen, reset it back to the top seamlessly
+                if (sharedYPosition > lCanvas.height) {
+                    sharedYPosition = -20;
                 }
             }
-            setInterval(drawLandscape, 50);
+            // Medium frame interval speed
+            setInterval(drawLandscape, 45);
         }
     </script>
 </body>
