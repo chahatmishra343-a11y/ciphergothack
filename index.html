@@ -26,7 +26,6 @@
             color: var(--matrix-green);
         }
 
-        /* Background Canvas for Binary Rain */
         canvas {
             position: absolute;
             top: 0;
@@ -36,7 +35,6 @@
             z-index: 1;
         }
 
-        /* Glassmorphic/Solid Terminal Card */
         .console-container {
             position: absolute;
             top: 50%;
@@ -115,7 +113,6 @@
             color: #fff;
         }
 
-        /* --- PREVIEW / EXP_LINK OVERLAY --- */
         #preview-overlay {
             display: none;
             position: fixed;
@@ -172,7 +169,7 @@
     </div>
 
     <script>
-        // --- MATRIX BACKGROUND DIGITAL WATERFALL ---
+        // --- VERTICAL GENERATOR BACKGROUND NOISE ---
         const canvas = document.getElementById('matrixCanvas');
         const ctx = canvas.getContext('2d');
 
@@ -191,14 +188,12 @@
         function drawMatrix() {
             ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-
             ctx.fillStyle = '#00ff00';
             ctx.font = fontSize + 'px monospace';
 
             for (let i = 0; i < drops.length; i++) {
                 const text = chars.charAt(Math.floor(Math.random() * chars.length));
                 ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-
                 if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
                     drops[i] = 0;
                 }
@@ -207,7 +202,7 @@
         }
         let matrixInterval = setInterval(drawMatrix, 30);
 
-        // --- GENERATOR LOGIC ---
+        // --- LINK PARAMETERS CREATION ENGINE ---
         let finalUrl = "";
         function generateGiftLink() {
             const name = document.getElementById('targetName').value.trim();
@@ -215,10 +210,8 @@
                 alert("Please enter a name first, Hacker!");
                 return;
             }
-            
             const baseUrl = window.location.href.split('?')[0];
             finalUrl = `${baseUrl}?gift=${encodeURIComponent(name)}`;
-            
             document.getElementById('linkDisplay').innerText = finalUrl;
             document.getElementById('resultBox').style.display = 'block';
         }
@@ -229,7 +222,7 @@
             window.location.href = finalUrl;
         }
 
-        // --- RECEIVER / PREVIEW PHASE ENGINE ---
+        // --- RECEIVER CHECK OVERLAY ---
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
             const giftName = urlParams.get('gift');
@@ -265,15 +258,14 @@
             }
         }
 
-        // --- STAGE 3, 4, & 5: THE FINE-TUNED "SLOW & SMOOTH" SHOW ---
+        // --- STAGE 3, 4, & 5: SYNCED LANDSCAPE PERFORMANCE SHOW ---
         function startLandscapeWaterfall(name) {
-            clearInterval(matrixInterval); // Stop normal vertical cascade
+            clearInterval(matrixInterval);
             
-            // --- AUDIO PLAYBACK ACTIVATION ---
             const music = document.getElementById('cyberMusic');
             if (music) {
                 music.play().catch(error => {
-                    console.log("Audio waiting for explicit user interaction:", error);
+                    console.log("Audio unlocked by device flip context:", error);
                 });
             }
             
@@ -289,7 +281,7 @@
             const totalLines = 13;
             const colWidth = lCanvas.width / totalLines;
             
-            // Randomize drops slightly so they roll in naturally
+            // Phase A starts with scattered randomized rain heights
             let lDrops = Array(totalLines).fill(0).map(() => Math.random() * -lCanvas.height);
             let timelineCounter = 0;
 
@@ -297,28 +289,43 @@
             const startCol = Math.floor((totalLines - name.length) / 2);
             const endCol = startCol + name.length;
 
+            // Flags to monitor when a phase transition happens so we snap heights ONCE
+            let happyBirthdaySnapped = false;
+            let nameSnapped = false;
+
             function drawLandscape() {
-                // Clear background with soft transparency trail
                 lCtx.fillStyle = 'rgba(0, 0, 0, 0.2)';
                 lCtx.fillRect(0, 0, lCanvas.width, lCanvas.height);
                 
                 lCtx.font = 'bold ' + (colWidth * 0.75) + 'px monospace';
-                timelineCounter += 50; // Tracking time in 50ms frames
+                timelineCounter += 50;
+
+                // --- TRANSITION SYNC TRAPS ---
+                // Exactly at 4 seconds, force every column tracking drop to reset flawlessly to the top together!
+                if (timelineCounter > 4000 && !happyBirthdaySnapped) {
+                    lDrops.fill(-20); 
+                    happyBirthdaySnapped = true;
+                }
+                // Exactly at 12 seconds, force them to snap perfectly to the top again for the name launch!
+                if (timelineCounter > 12000 && !nameSnapped) {
+                    lDrops.fill(-20);
+                    nameSnapped = true;
+                }
 
                 for(let i = 0; i < totalLines; i++) {
                     let charToPrint = "";
                     let isWordChar = false;
 
-                    // PHASE A: Pure Binary Noise Intro (0 to 4 seconds)
+                    // PHASE A: Natural Scattered Binary Rain (0 - 4s)
                     if (timelineCounter <= 4000) {
                         charToPrint = Math.random() > 0.5 ? "1" : "0";
                     }
-                    // PHASE B: HAPPY BIRTHDAY Cascade (4 to 12 seconds)
+                    // PHASE B: Synced Uniform HAPPY BIRTHDAY Line (4s - 12s)
                     else if (timelineCounter > 4000 && timelineCounter <= 12000) {
                         charToPrint = wishStr.charAt(i);
                         isWordChar = true;
                     } 
-                    // PHASE C: Custom Target Name Climax Climax (After 12 seconds)
+                    // PHASE C: Synced Uniform CUSTOM NAME Line Climax (12s+)
                     else if (timelineCounter > 12000) {
                         if (i >= startCol && i < endCol) {
                             charToPrint = name.charAt(i - startCol);
@@ -328,39 +335,42 @@
                         }
                     }
 
-                    // --- Styling Layers ---
+                    // --- Styling Parameters ---
                     if (isWordChar) {
                         if (timelineCounter > 12000) {
-                            // Core Custom Target Name: Vibrant neon green with heavy shadow glow
                             lCtx.fillStyle = '#00ff55';
                             lCtx.shadowBlur = 20;
                             lCtx.shadowColor = '#00ff00';
                         } else {
-                            // Happy Birthday text tracks: Solid terminal crisp white
                             lCtx.fillStyle = '#ffffff';
                             lCtx.shadowBlur = 10;
                             lCtx.shadowColor = '#00aa00';
                         }
                     } else {
-                        // Background Matrix Streams: Subdued, dull green color configuration
                         lCtx.fillStyle = 'rgba(0, 255, 0, 0.15)';
                         lCtx.shadowBlur = 0;
                     }
 
-                    // Render Character
                     lCtx.fillText(charToPrint, (i * colWidth) + (colWidth / 4), lDrops[i]);
-                    lCtx.shadowBlur = 0; // Instantly clean blur settings
+                    lCtx.shadowBlur = 0;
 
-                    // Uniform smooth downward pixel glide velocity drift step (No flashing skips)
+                    // Move down uniformly
                     lDrops[i] += 6; 
 
-                    // Natural boundary loop reset
+                    // Loop boundaries
                     if (lDrops[i] > lCanvas.height) {
-                        lDrops[i] = -20; // Stagger slightly above bounds
+                        // After snapping is engaged, loops should drop uniformly too to keep the text aligned!
+                        if (timelineCounter > 4000 && timelineCounter <= 12000) {
+                            lDrops[i] = -20;
+                        } else if (timelineCounter > 12000) {
+                            lDrops[i] = -20;
+                        } else {
+                            // Phase A keeps its chaotic loops
+                            lDrops[i] = Math.random() * -100;
+                        }
                     }
                 }
             }
-            // Steady 50ms interval frame update pace
             setInterval(drawLandscape, 50);
         }
     </script>
